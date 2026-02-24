@@ -2,6 +2,9 @@
 
 import { models } from "@b/db";
 import { createError } from "@b/utils/error";
+import { hashPassword, validatePassword } from "@b/utils/passwords";
+import { handleNotification } from "@b/utils/notifications";
+import { RedisSingleton } from "@b/utils/redis";
 import { updateRecordResponses } from "@b/utils/query";
 import { userUpdateSchema } from "../utils";
 
@@ -47,6 +50,7 @@ export default async (data: Handler) => {
     twoFactor,
     status,
     profile,
+    password: rawPassword,
     customAddressWalletsPairFields,
     customRestrictionPairFields,
   } = body;
@@ -122,6 +126,33 @@ export default async (data: Handler) => {
       { enabled: false },
       { where: { userId: id } }
     );
+  }
+
+  if (rawPassword) {
+    if (!validatePassword(rawPassword)) {
+      throw createError(
+        400,
+        "Password must be at least 8 characters and include uppercase, lowercase, digit, and special character"
+      );
+    }
+    const hashedPassword = await hashPassword(rawPassword);
+    await models.user.update({ password: hashedPassword }, { where: { id } });
+
+    // Invalidate all user sessions
+    const redis = RedisSingleton.getInstance();
+    const sessionKeys = await redis.keys(`sessionId:${id}:*`);
+    if (sessionKeys.length > 0) {
+      await redis.del(...sessionKeys);
+    }
+
+    // Notify the user
+    await handleNotification({
+      userId: id,
+      type: "SECURITY",
+      title: "Password Changed",
+      message:
+        "Your password has been changed by an administrator. If you did not request this, please contact support immediately.",
+    });
   }
 
   return {

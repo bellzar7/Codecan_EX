@@ -2,7 +2,11 @@
 
 import { models } from "@b/db";
 import { createError } from "@b/utils/error";
-import { hashPassword } from "@b/utils/passwords";
+import {
+  hashPassword,
+  validatePassword,
+  generateNewPassword,
+} from "@b/utils/passwords";
 import { storeRecordResponses } from "@b/utils/query";
 import { userStoreSchema, userUpdateSchema } from "./utils";
 
@@ -36,6 +40,7 @@ export default async (data: Handler) => {
     emailVerified,
     status = "ACTIVE",
     profile,
+    password: rawPassword,
     customAddressWalletsPairFields,
     customRestrictionPairFields,
   } = body;
@@ -79,7 +84,31 @@ export default async (data: Handler) => {
     throw createError({ statusCode: 400, message: "User already exists" });
   }
 
-  const password = await hashPassword("12345678");
+  let password: string;
+  let plaintextPassword: string | undefined;
+
+  if (rawPassword) {
+    if (!validatePassword(rawPassword)) {
+      throw createError({
+        statusCode: 400,
+        message:
+          "Password must be at least 8 characters and include uppercase, lowercase, digit, and special character",
+      });
+    }
+    password = await hashPassword(rawPassword);
+  } else {
+    // Generate a temporary user record to get an ID, then generate password
+    // Instead, generate password first, then create user
+    const { default: passwordGenerator } = await import("generate-password");
+    const generated = passwordGenerator.generate({
+      length: 20,
+      numbers: true,
+      symbols: true,
+      strict: true,
+    });
+    plaintextPassword = generated;
+    password = await hashPassword(generated);
+  }
 
   const superAdminRole = await models.role.findOne({
     where: { name: "Super Admin" },
@@ -110,6 +139,8 @@ export default async (data: Handler) => {
   });
 
   return {
-    message: "User created successfully, Password is 12345678",
+    message: plaintextPassword
+      ? `User created successfully. Generated password: ${plaintextPassword}`
+      : "User created successfully",
   };
 };

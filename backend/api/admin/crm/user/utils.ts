@@ -249,6 +249,12 @@ export const userUpdateSchema: SchemaObject = {
     lastName,
     email,
     phone,
+    password: {
+      type: "string",
+      description:
+        "User password (optional, auto-generated if empty). Must be 8+ chars with upper, lower, digit, and special char.",
+      minLength: 8,
+    },
     status,
     emailVerified,
     twoFactor,
