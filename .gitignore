@@ -1,0 +1,54 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build outputs
+dist/
+build/
+.next/
+out/
+
+# Cache
+.cache/
+*.tsbuildinfo
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Database
+mysql/
+
+# Uploads
+public/uploads/
+
+# Coverage
+coverage/
+
+# Vercel
+.vercel/
+
+# Misc
+*.min.js
+*.bundle.js
+public/lib/
+packages/**/extras/
+packages/**/examples/
+packages/**/dist/
+packages/**/build/

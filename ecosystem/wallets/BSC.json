@@ -1,0 +1,12 @@
+{
+  "address": "0x1568F4157e5B9fb456ef727E0EFc0f7E3c7C1E1B",
+  "data": {
+    "mnemonic": "rigid learn rate village lion bar patch rescue real erode universe nominee",
+    "publicKey": "0x038c962938d5b7fc5c78edb65ecbd0eb37964b824307247fe78c4992215a34ecc4",
+    "privateKey": "0x6111b1e8eebde073027c8e320ba97e6bde5bce4f8ff47ebb2ec0aa1b8bbd7616",
+    "xprv": "xprvA3e1cRdhwJtZA5ekVqnWHK8c5PYXZZidJ8dPxbbe3awAG5RUrzfni57WdHxqjME4Psy4VvX7qh1BuJAF9pxQtJqYXptpyFcJqPro725yAi3",
+    "xpub": "xpub6GdN1wAbmgSrNZjDbsKWeT5LdRP1y2SUfMYzkz1FbvU98skdQXz3FsRzUbGWwiRhU8sasJ4WnbEWz5Vr3ErdK1dAPz4ZtUQJvC268rviLhb",
+    "chainCode": "0xbdc48ea5902dc9267ac7895a9a1d49c30028d14d04f790e93051d1f9be512512",
+    "path": "m/44'/60'/0'/0/0"
+  }
+}

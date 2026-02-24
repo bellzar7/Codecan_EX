@@ -1,0 +1,96 @@
+version: "3.9"
+
+services:
+  mysql:
+    env_file: .env
+    image: mysql:8
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    command: ["--character-set-server=utf8mb4","--collation-server=utf8mb4_unicode_ci"]
+    volumes:
+      - mysql_data:/var/lib/mysql
+      # ⚠️ МОНТУЄМО РОБОЧИЙ ФАЙЛ З КОРЕНЯ РЕПО
+      - ./initial.sql:/docker-entrypoint-initdb.d/10-schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -proot || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+
+  redis:
+    env_file: .env
+    image: redis:7-alpine
+    environment:
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+
+  zookeeper:
+    env_file: .env
+    image: confluentinc/cp-zookeeper:7.5.0
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+
+  kafka:
+    env_file: .env
+    image: confluentinc/cp-kafka:7.5.0
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+      - "29092:29092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
+  scylla:
+    image: scylladb/scylla:5.2
+    command: --smp 1 --memory 512M --overprovisioned 1 --api-address 0.0.0.0
+    ports:
+      - "9042:9042"
+    volumes:
+      - scylla_data:/var/lib/scylla
+    healthcheck:
+      test: [ "CMD-SHELL", "nodetool statusbinary | grep -q running" ]
+      interval: 15s
+      timeout: 5s
+      retries: 20
+      start_period: 120s
+
+  # Сідимо пісня імпорту схеми
+  seed:
+    image: node:20-bullseye
+    working_dir: /app
+    volumes:
+      - .:/app
+    env_file: .env
+    environment:
+      # В середині контейнера адреса MySQL — це ім'я сервісу
+      DB_HOST: mysql
+      DB_PORT: 3306
+    depends_on:
+      mysql:
+        condition: service_healthy
+    restart: "no"
+    command: ["bash","-lc","corepack enable && pnpm i --ignore-scripts && pnpm db:setup"]
+
+volumes:
+  mysql_data:
+  scylla_data:

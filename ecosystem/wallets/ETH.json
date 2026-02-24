@@ -1,0 +1,12 @@
+{
+  "address": "0xfC28cC0740aa57Da0D3035d3e4bEE45aFEb23f66",
+  "data": {
+    "mnemonic": "retire unfair entire process enjoy stool broken diagram gather modify boil route",
+    "publicKey": "0x03502f15c47e29608c21d6f50fffe053593937083a5f6e4c94ae1b59ab3450e230",
+    "privateKey": "0xb6456646cb93d3d486cd4c90559da381694a998d962eac59b763c9f0784c2657",
+    "xprv": "xprvA2UCiHztdH929UCAPi4NxG7yQNx6aPUHqtNEh57oAFFDhqSDgRkDGt8unSCeK6q9YsXNxWQSmdGc5H2PFpHVR3raayiCVMwipCJu2Un1Cnz",
+    "xpub": "xpub6FTZ7oXnTehKMxGdVjbPKQ4hxQnayrC9D7HqVTXQianCadmNDy4TpgTPdiQCFZ24twBuZNkSkPPtdE4NHqoxf2KLLbCxx9QeTHTQ5UwmmbG",
+    "chainCode": "0x321bad053698a5e13e2aa342131399f61089ae2c210ca530e37d733b1f37c9e6",
+    "path": "m/44'/60'/0'/0/0"
+  }
+}

@@ -1,0 +1,16 @@
+export const poolSchema = {
+  id: { type: "string" },
+  symbol: { type: "string" },
+  currency: { type: "string" },
+  pair: { type: "string" },
+  baseBalance: { type: "number" },
+  quoteBalance: { type: "number" },
+  baseInOrder: { type: "number" },
+  quoteInOrder: { type: "number" },
+  spreadPercentage: { type: "number" },
+  minOrderSize: { type: "number" },
+  maxOrderSize: { type: "number" },
+  isActive: { type: "boolean" },
+  createdAt: { type: "string", format: "date-time" },
+  updatedAt: { type: "string", format: "date-time" },
+};

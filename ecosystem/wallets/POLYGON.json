@@ -1,0 +1,12 @@
+{
+  "address": "0x1bFA50881ebc6f159B43d5Fd70E160c3987A0a07",
+  "data": {
+    "mnemonic": "shock nurse gossip grain goat prevent clerk simple crash food eyebrow guilt",
+    "publicKey": "0x02e102c5b6d2ed42f36613e54d7c07ac09ee6e7f84423209abb6abf5a9ac3b2143",
+    "privateKey": "0xcad9bf6f6e1fdfe7bcee1d292bd7f2ff1d7f62962e6ae3c0b990b79f1c7ba682",
+    "xprv": "xprvA2xgFkKpNrfTUS7yiu1TSsqAiNebZD82dkuhu1PM3RvnTaNSCQJfvjjkin6M4ogeF9h5dzzZgAJZZN2LqAuXnu8WMZBEDK6bmSnGtp3zbHc",
+    "xpub": "xpub6Fx2fFriDEDkgvCSpvYTp1muGQV5xfqszyqJhPnxbmTmLNhajwcvUY4Ea3HsZa3BFmjXyzwQjheYCQukL6YP1o5ZxjQuGTBNkW2Ubmnxdsc",
+    "chainCode": "0x1c9e60dcbc1631123c728b3225caf6b60aa361e71589a7d8c9085948ddbba1b1",
+    "path": "m/44'/60'/0'/0/0"
+  }
+}

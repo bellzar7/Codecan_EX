@@ -1,0 +1,56 @@
+{
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "extends": ["ultracite/core", "ultracite/next", "ultracite/biome/core"],
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true,
+    "defaultBranch": "main"
+  },
+  "files": {
+    "includes": [
+      "**/*.{js,jsx,ts,tsx,mjs,cjs,json,jsonc}",
+      "!!**/node_modules",
+      "!!**/.next",
+      "!!**/dist",
+      "!!**/build",
+      "!!**/coverage",
+      "!!**/.pnpm-store",
+      "!!**/.vercel",
+      "!!**/.cache",
+      "!!**/logs",
+      "!!**/mysql",
+      "!!**/public/uploads",
+      "!!**/*.min.js",
+      "!!**/*.bundle.js",
+      "!!**/public/lib",
+      "!!**/packages/**/extras",
+      "!!**/packages/**/examples",
+      "!!**/packages/**/dist",
+      "!!**/packages/**/build"
+    ],
+    "ignoreUnknown": true
+  },
+  "overrides": [
+    {
+      "includes": ["src/components/builder/**/*"],
+      "linter": {
+        "rules": {
+          "style": {
+            "useFilenamingConvention": "off"
+          },
+          "suspicious": {
+            "noAlert": "off"
+          },
+          "performance": {
+            "noImgElement": "off"
+          },
+          "a11y": {
+            "useValidAnchor": "off",
+            "noStaticElementInteractions": "off"
+          }
+        }
+      }
+    }
+  ]
+}

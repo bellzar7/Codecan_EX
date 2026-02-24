@@ -1,0 +1,12 @@
+{
+  "address": "0x8acA42e0e5Ae38926fBd2779d4848f112a17CB85",
+  "data": {
+    "mnemonic": "ripple season boss noodle maid blind neck demand slow cradle middle allow",
+    "publicKey": "0x0211d0b427559bf743192e9916b452d6fc573204c3a385e2f6aebc0f7a730a15d6",
+    "privateKey": "0x05279314f32e4f934e3395a536f252040aff710148fa9ecdd9b5199dd16ce275",
+    "xprv": "xprvA38gZbEWMMX4Lfbi2d53vX8PK3mBnUoxkoYeGjwytpb8qdANbmW7DBUAPx99gzVhoUbxjbDVigGadNUyN8crCp83Eoz5de4yZjFYVPR8wrv",
+    "xpub": "xpub6G82y6mQBj5MZ9gB8ec4Hf57s5bgBwXp82UF58MbTA87iRVX9JpMkyneFDGVXom9hYmMU3c7EcqYBCd7qCyZE1yRCMFRtf7YJVPP5fz5iz4",
+    "chainCode": "0x2e4cdcaa157ff6b8e9e01650e096f99f9ce69e49cf4b871a7523bd481f792e6f",
+    "path": "m/44'/60'/0'/0/0"
+  }
+}

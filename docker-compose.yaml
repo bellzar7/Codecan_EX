@@ -1,0 +1,143 @@
+version: "3.8"
+
+services:
+  app:
+    build: .
+    env_file: .env
+    depends_on:
+      scylla:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      zookeeper:
+        condition: service_started
+      kafka:
+        condition: service_started
+    ports:
+      - "3000:3000"
+      - "4000:4000"
+      - "4002:4002"
+    networks:
+      - backend
+    volumes:
+      - ./.env:/.env
+      - ./entrypoint.sh:/entrypoint.sh
+      - ./config.js:/app/config.js
+      - ./tsconfig.json:/app/tsconfig.json
+      - ./package.json:/app/package.json
+      - ./backend:/app/backend
+      - ./src:/app/src
+      - ./models:/app/models
+      - /app/node_modules
+      - ./installer.sh:/installer.sh:ro
+    entrypoint: ["/bin/bash", "/entrypoint.sh"]
+    command: pnpm start
+    environment:
+      NODE_ENV: production
+      DB_HOST: mysql
+      DB_PORT: 3306
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    restart: always
+
+  redis:
+    env_file: .env
+    image: redis:7-alpine
+    container_name: redis
+    environment:
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+    ports:
+      - "6379:6379"
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+    restart: always
+
+  scylla:
+    env_file: .env
+    image: scylladb/scylla:5.2
+    container_name: scylla-manager-db
+    ports:
+      - "9042:9042"
+    networks:
+      - backend
+    command: --smp 1 --memory 512M --overprovisioned 1 --api-address 0.0.0.0
+    volumes:
+      - scylla-data:/var/lib/scylla
+    healthcheck:
+      test: [ "CMD-SHELL", "nodetool statusbinary | grep -q running" ]
+      interval: 15s
+      timeout: 5s
+      retries: 20
+      start_period: 120s
+
+  zookeeper:
+    env_file: .env
+    image: confluentinc/cp-zookeeper:7.5.0
+    container_name: zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2182:2181"
+    networks:
+      - backend
+    restart: always
+
+  kafka:
+    env_file: .env
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    networks:
+      - backend
+    restart: always
+
+  mysql:
+    env_file: .env
+    image: mysql:8
+    container_name: mysql
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    command: ["--character-set-server=utf8mb4","--collation-server=utf8mb4_unicode_ci"]
+    networks:
+      - backend
+    volumes:
+      - ./initial.sql:/docker-entrypoint-initdb.d/10-schema.sql:ro
+      - mysql_data:/var/lib/mysql
+      - /usr/share/zoneinfo:/usr/share/zoneinfo:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -proot || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+    restart: always
+
+networks:
+  backend:
+    driver: bridge
+
+volumes:
+  mysql_data:
+  scylla-data:

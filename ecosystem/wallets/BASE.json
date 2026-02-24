@@ -1,0 +1,12 @@
+{
+  "address": "0x994FA240dE809dF43538afdb5cCaF5486da74852",
+  "data": {
+    "mnemonic": "legend ceiling tumble fine cart lady pause indicate patrol budget exhibit huge",
+    "publicKey": "0x03a59aa8206cf4fff3d11a3d3d405e84a1833ddccb32a9031cb8ca4557a87d4763",
+    "privateKey": "0xac64b861fbb6acf1faa464694b3b9b2da13fa285a30662b837685862b415bb17",
+    "xprv": "xprvA3zTGJiQ9WGvqZ1HRFVuhAHfnAyp9qmcW42BJkyqwNKnXKq578u7Fa4KFREfpYGCFYupdiXo9CPCNAcuy9PwpQMA8oWwhgWz9tAVA91VUHD",
+    "xpub": "xpub6GyofpFHysqE435kXH2v4JEQLCpJZJVTsGwn79PTVhrmQ8ADegDMoNNo6iAC1q1PzMJhStJHeTKiCWRKQHk83qxHLGwwnFqnfV9GBT98CVR",
+    "chainCode": "0x95f6a1f0f65e9b12769659bbc921f978d49ac728a32fb3dbc6b5501b418fef65",
+    "path": "m/44'/60'/0'/0/0"
+  }
+}

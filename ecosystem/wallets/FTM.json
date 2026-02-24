@@ -1,0 +1,12 @@
+{
+  "address": "0x669BE72CC245e27b5369A66eA86eA4066777E8B2",
+  "data": {
+    "mnemonic": "elbow enrich youth damp high argue stone music indicate man smile job",
+    "publicKey": "0x0313bf060c09effba11c49f620c705382f643e6d5c04dfae6959bfac73516a18df",
+    "privateKey": "0x21d0e7ffd59514481376970653b31bd1a70e204e0cc3cc28118d45126d9b2356",
+    "xprv": "xprvA3p45BTXy5Mu26rcEcKFhgCd9D2Zu3RQQCEyDPFBKvdbEpTYpXxFs7z4KQD4cSKSKNYAuiUB924Y5vEWrTtQfko5Fr4jkMJfXbUBB9sNnmm",
+    "xpub": "xpub6GoQUgzRoSvCEaw5LdrG4p9MhEs4JW9FmRAa1mentGAa7cnhN5GWQvJYAh5NqNE8MqE4kAccoLtJnyycyDqwPKooS1wfs2gKRDotS5rmPoY",
+    "chainCode": "0x553bd927a272f83144dc9e089946f829171759531c25dd6b27f2b67238799122",
+    "path": "m/44'/60'/0'/0/0"
+  }
+}

@@ -1,0 +1,21 @@
+import { useTranslation } from "next-i18next";
+import { memo } from "react";
+import Input from "@/components/elements/form/input/Input";
+import useFuturesMarketStore from "@/stores/futures/market";
+
+const SearchBarBase = () => {
+  const { t } = useTranslation();
+  const { setSearchQuery } = useFuturesMarketStore();
+  return (
+    <Input
+      icon={"bx:bx-search"}
+      onChange={(e) => setSearchQuery(e.target.value)}
+      placeholder={t("Search pairs...")}
+      shape={"rounded-xs"}
+      size={"sm"}
+      type="text"
+      warning
+    />
+  );
+};
+export const SearchBar = memo(SearchBarBase);

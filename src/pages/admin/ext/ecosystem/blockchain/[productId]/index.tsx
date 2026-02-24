@@ -1,0 +1,482 @@
+import { useTranslation } from "next-i18next";
+import type React from "react";
+import { useEffect, useState } from "react";
+import Skeleton from "react-loading-skeleton";
+import Alert from "@/components/elements/base/alert/Alert";
+import Button from "@/components/elements/base/button/Button";
+import Card from "@/components/elements/base/card/Card";
+import Input from "@/components/elements/form/input/Input";
+import Layout from "@/layouts/Default";
+import $fetch, { $serverFetch } from "@/utils/api";
+import "react-loading-skeleton/dist/skeleton.css";
+import { Icon } from "@iconify/react";
+import { BackButton } from "@/components/elements/base/button/BackButton";
+import { useDashboardStore } from "@/stores/dashboard";
+
+interface UpdateData {
+  status: boolean;
+  message: string;
+  changelog: string | null;
+  update_id: string;
+  version: string;
+}
+
+interface Props {
+  initialProductId: string;
+  initialBlockchainVersion: string;
+  initialBlockchainName: string | null;
+  initialBlockchainChain: string | null;
+  initialBlockchainStatus: boolean;
+  initialLicenseVerified: boolean;
+  initialUpdateData: UpdateData;
+}
+
+const BlockchainDetails: React.FC<Props> = ({
+  initialProductId,
+  initialBlockchainVersion,
+  initialBlockchainName,
+  initialBlockchainChain,
+  initialBlockchainStatus,
+  initialLicenseVerified,
+  initialUpdateData,
+}) => {
+  const { t } = useTranslation();
+  const { isDark } = useDashboardStore();
+
+  const [productId] = useState(initialProductId);
+  const [blockchainVersion, setBlockchainVersion] = useState(
+    initialBlockchainVersion
+  );
+  const [blockchainName] = useState(initialBlockchainName);
+  const [blockchainChain] = useState(initialBlockchainChain);
+  const [blockchainStatus, setBlockchainStatus] = useState(
+    initialBlockchainStatus
+  );
+
+  const [licenseVerified, setLicenseVerified] = useState(
+    initialLicenseVerified
+  );
+  const [updateData, setUpdateData] = useState<UpdateData>(initialUpdateData);
+
+  const [purchaseCode, setPurchaseCode] = useState("");
+  const [envatoUsername, setEnvatoUsername] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [isUpdateChecking, setIsUpdateChecking] = useState(false);
+
+  // Skeleton colors
+  const [skeletonProps, setSkeletonProps] = useState({
+    baseColor: "#f7fafc",
+    highlightColor: "#edf2f7",
+  });
+
+  useEffect(() => {
+    setSkeletonProps({
+      baseColor: isDark ? "#27272a" : "#f7fafc",
+      highlightColor: isDark ? "#3a3a3e" : "#edf2f7",
+    });
+  }, [isDark]);
+
+  const externalNotesUrl = "https://support.mash3div.com/pages/5/update-notes";
+
+  const checkForUpdates = async () => {
+    if (!(productId && blockchainVersion)) return;
+    setIsUpdateChecking(true);
+    const { data } = await $fetch({
+      url: "/api/admin/system/update/check",
+      method: "POST",
+      body: { productId, currentVersion: blockchainVersion },
+      silent: true,
+    });
+    if (data) {
+      setUpdateData({
+        ...(data as any),
+        message: (data as any).message,
+      } as any);
+    }
+    setIsUpdateChecking(false);
+  };
+
+  const updateBlockchain = async () => {
+    setIsUpdating(true);
+    const { error } = await $fetch({
+      url: "/api/admin/system/update/download",
+      method: "POST",
+      body: {
+        productId,
+        updateId: updateData.update_id,
+        version: updateData.version,
+        product: blockchainName,
+        type: "blockchain",
+      },
+    });
+    if (!error) {
+      setBlockchainVersion(updateData.version);
+    }
+    setIsUpdating(false);
+  };
+
+  const activateLicenseAction = async () => {
+    setIsSubmitting(true);
+    const { data } = await $fetch({
+      url: "/api/admin/system/license/activate",
+      method: "POST",
+      body: { productId, purchaseCode, envatoUsername },
+    });
+    if (data) {
+      setLicenseVerified((data as any).status);
+    }
+    setIsSubmitting(false);
+  };
+
+  const handleActivateBlockchain = async () => {
+    setIsSubmitting(true);
+    const { error } = await $fetch({
+      url: `/api/admin/ext/ecosystem/blockchain/${productId}/status`,
+      method: "PUT",
+      body: { status: !blockchainStatus },
+    });
+    if (!error) {
+      setBlockchainStatus(!blockchainStatus);
+    }
+    setIsSubmitting(false);
+  };
+
+  const noUpdateAvailable =
+    !updateData.status &&
+    updateData.message === "You have the latest version of Bicrypto.";
+
+  const errorOrFallbackScenario =
+    !updateData.status &&
+    updateData.message !== "You have the latest version of Bicrypto." &&
+    updateData.message !== "";
+
+  return (
+    <Layout color="muted" title={t("Blockchain Details")}>
+      {/* Top Bar */}
+      <div className="mb-8 flex w-full items-center justify-between text-muted-800 dark:text-muted-200">
+        <div className="flex flex-col space-y-1">
+          <h1 className="font-bold text-2xl">
+            {blockchainChain || t("Blockchain Details")}
+          </h1>
+          <p className="text-muted-600 text-sm dark:text-muted-400">
+            {t("Current Version")}:{" "}
+            <span className="font-medium text-info-500">
+              {blockchainVersion}
+            </span>
+          </p>
+        </div>
+
+        <div className="flex items-center space-x-3">
+          <div
+            className={`h-4 w-4 animate-pulse rounded-full ${
+              licenseVerified ? "bg-green-500" : "bg-red-500"
+            }`}
+            title={
+              licenseVerified
+                ? t("License Verified")
+                : t("License Not Verified")
+            }
+          />
+          <span className="text-sm">
+            {licenseVerified
+              ? t("License Verified")
+              : t("License Not Verified")}
+          </span>
+
+          {blockchainVersion !== "0.0.1" && (
+            <Button
+              color={blockchainStatus ? "danger" : "success"}
+              disabled={isSubmitting}
+              loading={isSubmitting}
+              onClick={handleActivateBlockchain}
+            >
+              <Icon
+                className="mr-2 h-5 w-5"
+                icon={blockchainStatus ? "carbon:close" : "carbon:checkmark"}
+              />
+              {blockchainStatus ? t("Disable") : t("Enable")}
+            </Button>
+          )}
+          <BackButton href={"/admin/ext/ecosystem"} />
+        </div>
+      </div>
+
+      {/* Always show three-column layout */}
+      <div className="grid grid-cols-3 gap-6">
+        {/* Left Section (2/3) */}
+        <div className="col-span-2 space-y-6">
+          {isUpdateChecking ? (
+            <div className="space-y-6">
+              <div className="space-y-3">
+                <Skeleton height={48} {...skeletonProps} />
+              </div>
+              <Card className="space-y-5 border border-muted-200 p-5 shadow-xs dark:border-muted-700">
+                <div className="space-y-4">
+                  <Skeleton height={20} width={120} {...skeletonProps} />
+                  <Skeleton count={3} {...skeletonProps} />
+                </div>
+              </Card>
+            </div>
+          ) : (
+            <>
+              {updateData.status && (
+                <div className="space-y-3">
+                  <Alert
+                    canClose={false}
+                    className="text-md"
+                    color="info"
+                    icon="material-symbols-light:info-outline"
+                  >
+                    {t(
+                      "Please backup your database and blockchain files before upgrading"
+                    )}
+                    .
+                  </Alert>
+                  {updateData.message && (
+                    <Alert canClose={false} className="text-md" color="success">
+                      {updateData.message}
+                    </Alert>
+                  )}
+                </div>
+              )}
+
+              {noUpdateAvailable && (
+                <>
+                  <Alert canClose={false} className="text-md" color="success">
+                    {updateData.message}
+                  </Alert>
+                  <Card className="flex flex-col space-y-5 border border-muted-200 p-5 shadow-xs dark:border-muted-700">
+                    <h3 className="font-semibold text-gray-800 text-xl dark:text-gray-200">
+                      {t("Update Notes")}
+                    </h3>
+                    <p className="text-muted-600 text-sm dark:text-muted-400">
+                      {t(
+                        "There are no updates available for your system at this time."
+                      )}
+                    </p>
+                  </Card>
+                </>
+              )}
+
+              {errorOrFallbackScenario && (
+                <Alert canClose={false} className="text-md" color="warning">
+                  {updateData.message ||
+                    t("Unable to retrieve update information.")}
+                </Alert>
+              )}
+
+              {updateData.status && updateData.changelog && (
+                <Card className="space-y-5 border border-muted-200 p-5 shadow-xs dark:border-muted-700">
+                  <h3 className="font-semibold text-gray-800 text-xl dark:text-gray-200">
+                    {t("Update Notes")}
+                  </h3>
+                  <div
+                    className="prose dark:prose-dark max-h-96 overflow-auto pl-5 text-muted-800 text-sm dark:text-muted-200"
+                    dangerouslySetInnerHTML={{
+                      __html: updateData.changelog || "",
+                    }}
+                  />
+                </Card>
+              )}
+            </>
+          )}
+        </div>
+
+        {/* Right Section (1/3) */}
+        <div className="col-span-1 space-y-6">
+          <Card className="space-y-5 border border-muted-200 p-5 shadow-xs dark:border-muted-700">
+            <h3 className="font-semibold text-gray-800 text-lg dark:text-gray-200">
+              {t("Update Actions")}
+            </h3>
+            <p className="text-muted-600 text-sm dark:text-muted-400">
+              {updateData.status
+                ? t(
+                    "Update to the latest version once your license is verified."
+                  )
+                : t(
+                    "No updates available or unable to retrieve updates. You can re-check at any time."
+                  )}
+            </p>
+            {isUpdateChecking ? (
+              <div className="flex flex-col gap-3">
+                <Skeleton height={32} width="100%" {...skeletonProps} />
+                <Skeleton height={32} width="100%" {...skeletonProps} />
+              </div>
+            ) : (
+              <>
+                <Button
+                  className="w-full"
+                  color="success"
+                  disabled={
+                    !(updateData.status && licenseVerified) ||
+                    updateData.update_id === "" ||
+                    isUpdating
+                  }
+                  loading={isUpdating}
+                  onClick={updateBlockchain}
+                  type="submit"
+                >
+                  {blockchainVersion === "0.0.1" ? t("Install") : t("Update")}
+                </Button>
+                <Button
+                  className="w-full"
+                  color="primary"
+                  disabled={isUpdateChecking}
+                  loading={isUpdateChecking}
+                  onClick={checkForUpdates}
+                  type="button"
+                >
+                  {t("Check for Updates")}
+                </Button>
+              </>
+            )}
+          </Card>
+
+          {!licenseVerified && (
+            <Card className="space-y-5 border border-muted-200 p-5 shadow-xs dark:border-muted-700">
+              <h4 className="font-semibold text-gray-800 text-md dark:text-gray-200">
+                {t("License Verification")}
+              </h4>
+              <p className="text-muted-600 text-sm dark:text-muted-400">
+                {t(
+                  "Please enter your purchase details to verify your license."
+                )}
+              </p>
+              <Input
+                label={t("Purchase Code")}
+                onChange={(e) => setPurchaseCode(e.target.value)}
+                placeholder={t("Enter your purchase code")}
+                type="text"
+                value={purchaseCode}
+              />
+              <Input
+                label={t("Envato Username")}
+                onChange={(e) => setEnvatoUsername(e.target.value)}
+                placeholder={t("Enter your Envato username")}
+                type="text"
+                value={envatoUsername}
+              />
+              <Button
+                className="w-full"
+                color="primary"
+                disabled={isSubmitting}
+                loading={isSubmitting}
+                onClick={activateLicenseAction}
+              >
+                {t("Activate License")}
+              </Button>
+            </Card>
+          )}
+        </div>
+      </div>
+    </Layout>
+  );
+};
+
+export const permission = "Access Blockchain Management";
+
+export async function getServerSideProps(context: any) {
+  try {
+    const { productId } = context.query;
+
+    if (!productId) {
+      return {
+        props: {
+          initialProductId: "",
+          initialBlockchainVersion: "",
+          initialBlockchainName: null,
+          initialBlockchainChain: null,
+          initialBlockchainStatus: false,
+          initialLicenseVerified: false,
+          initialUpdateData: {
+            status: false,
+            message: "No product selected",
+            changelog: null,
+            update_id: "",
+            version: "",
+          },
+        },
+      };
+    }
+
+    // Fetch blockchain data
+    const blockchainResponse = await $serverFetch(context, {
+      url: `/api/admin/ext/ecosystem/blockchain/${productId}`,
+    });
+
+    const blockchainData = blockchainResponse.data || {};
+    const blockchainVersion = blockchainData.version || "";
+    const blockchainName = blockchainData.name || null;
+    const blockchainChain = blockchainData.chain || null;
+    const blockchainStatus = blockchainData.status;
+
+    let licenseVerified = false;
+    let updateData: UpdateData = {
+      status: false,
+      message: "You have the latest version of Bicrypto.",
+      changelog: null,
+      update_id: "",
+      version: blockchainVersion,
+    };
+
+    // Verify license
+    if (productId && blockchainName) {
+      const licenseVerification = await $serverFetch(context, {
+        url: "/api/admin/system/license/verify",
+        method: "POST",
+        body: { productId },
+      });
+      licenseVerified = licenseVerification?.data?.status ?? false;
+    }
+
+    // Check for updates if license verified
+    if (licenseVerified && productId && blockchainVersion) {
+      const updateCheck = await $serverFetch(context, {
+        url: "/api/admin/system/update/check",
+        method: "POST",
+        body: { productId, currentVersion: blockchainVersion },
+      });
+      if (updateCheck.data) {
+        updateData = {
+          ...updateData,
+          ...updateCheck.data,
+          message: updateCheck.data.message,
+        };
+      }
+    }
+
+    return {
+      props: {
+        initialProductId: productId,
+        initialBlockchainVersion: blockchainVersion,
+        initialBlockchainName: blockchainName,
+        initialBlockchainChain: blockchainChain,
+        initialBlockchainStatus: blockchainStatus,
+        initialLicenseVerified: licenseVerified,
+        initialUpdateData: updateData,
+      },
+    };
+  } catch (error) {
+    console.error("Error fetching data:", error);
+    return {
+      props: {
+        initialProductId: "",
+        initialBlockchainVersion: "",
+        initialBlockchainName: null,
+        initialBlockchainChain: null,
+        initialBlockchainStatus: false,
+        initialLicenseVerified: false,
+        initialUpdateData: {
+          status: false,
+          message: "Unable to check for updates at this time.",
+          changelog: null,
+          update_id: "",
+          version: "",
+        },
+      },
+    };
+  }
+}
+
+export default BlockchainDetails;
