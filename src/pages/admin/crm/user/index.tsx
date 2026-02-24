@@ -69,7 +69,6 @@ const columnConfig: ColumnConfigType[] = [
 const Users = () => {
   const { t } = useTranslation();
 
-  // Handle export button click
   const handleExport = async () => {
     try {
       await $fetch({
